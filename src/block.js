@@ -1,4 +1,4 @@
-class Ground {
+class Block {
   constructor(x, y, height, width, color = [150, 75, 0]) {
     this.x = x;
     this.y = y;
@@ -11,8 +11,6 @@ class Ground {
     noStroke();
     fill(this.color);
 
-    rect(this.x, this.y, this.width, this.height - 30);
-    // fill(0, 255, 0, 50);
-    // rect(this.x, this.y, this.width, this.height);
+    rect(this.x, this.y, this.width, this.height);
   }
 }
