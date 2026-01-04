@@ -2,8 +2,8 @@ class Block {
   constructor(x, y, height, width, color = [150, 75, 0]) {
     this.x = x;
     this.y = y;
-    this.height = height;
-    this.width = width;
+    this.h = height;
+    this.w = width;
     this.color = color;
   }
 
@@ -11,6 +11,6 @@ class Block {
     noStroke();
     fill(this.color);
 
-    rect(this.x, this.y, this.width, this.height);
+    rect(this.x, this.y, this.w, this.h);
   }
 }
