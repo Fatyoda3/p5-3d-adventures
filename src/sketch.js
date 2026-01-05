@@ -1,60 +1,49 @@
 /// <reference types="p5/global"/>
 // @ts-nocheck
 
-const generatedItems = () => {
-  const items = {};
-  items.blocks = generateBlocks();
-  items.grounds = generateGround();
-  return items;
+const GAP_RANGE = [70, 100];
+const PIPE_WIDTH = 30;
+const PIPE_HEIGHT_RANGE = [100, 200];
+
+const generatePipes = (count) => {
+  const arrangeSize = width / count;
+  const pipes = [];
+  for (let index = 0; index < count; index++) {
+    const x = width + index * arrangeSize;
+    const gap = random(...GAP_RANGE);
+    const height = random(...PIPE_HEIGHT_RANGE);
+    const pipe = new Pipe(x, 0, gap, height, PIPE_WIDTH);
+    pipes.push(pipe);
+  }
+  return pipes;
 };
 
-let sun;
-let mario;
+let bird;
+let pipes;
 
 function setup() {
   createCanvas(800, 400);
-  sun = new Sun(100, 100, 100);
-  const gravity = createVector(0, 0.07);
-  const friction = createVector(1, 0);
-  const items = generatedItems();
+  const gravity = createVector(0, 0.1);
 
-  mario = new Mario(40, 40, 40);
-  mario.addForce(gravity);
+  pipes = generatePipes(4);
 
-  items.grounds.forEach((ground) => mario.addGround(ground));
-
-  items.blocks.forEach((block) => mario.addBlock(block));
-
-  const enemies = generateEnemy(5, mario.grounds[0]);
-  // enemies.forEach((enemy) => mario.addEnemies(enemy));
+  bird = new Bird(50, 50, 10, 50, pipes);
+  bird.addForce(gravity);
 }
-let reset = 0;
+
 function draw() {
-  background(135, 206, 235);
-  if (mario.lifes === 0) {
-    background(255, 0, 0, 250);
-    return;
-  }
-  drawSurrounding();
-  fill(9);
-
-  mario.grounds.forEach((ground) => ground.draw());
-
-  mario.enemies.forEach((enemy) => {
-    enemy.draw();
-    enemy.move();
+  background(220);
+  bird.update();
+  bird.draw();
+  pipes.forEach((pipe) => {
+    pipe.draw();
+    pipe.update();
   });
 
-  if (reset <= 0) {
-    mario.draw();
-    mario.update();
-
-    if (mario.outOfBound() || mario.isOut) {
-      mario.lifes -= 1;
-      mario.reset();
-      reset = 100;
-    }
+  if (bird.isDead()) {
+    noLoop();
   }
-
-  reset--;
+  if (keyIsPressed) {
+    bird.jump();
+  }
 }
