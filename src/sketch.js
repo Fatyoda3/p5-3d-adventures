@@ -27,6 +27,7 @@ class Cube {
     this.w = w;
     this.d = d;
     this.vertices = this.createVertices();
+    this.faces = this.createFaces();
   }
 
   createVertices() {
@@ -42,6 +43,18 @@ class Cube {
     const p8 = createVector(-w2, -h2, +d2); //(B-L-T)
     return [p1, p2, p3, p4, p5, p6, p7, p8];
   }
+
+  createFaces() {
+    const [p1, p2, p3, p4, p5, p6, p7, p8] = this.vertices;
+    const f1 = [p1, p2, p3, p4]; // FRONT
+    const f2 = [p5, p6, p7, p8]; // BACK
+    const f3 = [p1, p4, p5, p8]; // TOP
+    const f4 = [p2, p3, p6, p7]; // BOTTOM
+    const f5 = [p1, p8, p7, p2]; // LEFT
+    const f6 = [p4, p3, p6, p5]; // RIGHT
+
+    return [f1, f2, f3, f4, f5, f6];
+  }
 }
 
 const getProjection = (p, screenZ = WORLD_ITEMS.screenZ) => {
@@ -55,20 +68,28 @@ let cube;
 function setup() {
   createCanvas(400, 600);
 
-  cube = new Cube(0, 0, 1000, 100, 100, 100);
+  cube = new Cube(-100, 100, 700, 100, 100, 100);
 }
 
 function draw() {
   background(220, 220, 220);
   translate(width / 2, height / 2);
+  beginShape();
 
-  cube.vertices.forEach((p, i) => {
-    const actualPos = p5.Vector.add(p, cube.centre);
+  cube.faces.forEach((face) => {
+    stroke(0);
+    beginShape();
+    face.forEach((p) => {
+      const actualPoint = p5.Vector.add(p, cube.centre);
+      const toProject = getProjection(actualPoint);
+      vertex(toProject.x, toProject.y);
+    });
 
-    const toProject = getProjection(actualPos);
+    const actualPoint = p5.Vector.add(face[0], cube.centre);
+    const toProject = getProjection(actualPoint);
+    vertex(toProject.x, toProject.y);
 
-    fill(WORLD_ITEMS.palette[i]);
-    circle(toProject.x, toProject.y, 5);
+    endShape();
   });
 
   noLoop();
