@@ -21,7 +21,8 @@ const KEYS = {
   UP: 38,
   RIGHT: 39,
   DOWN: 40,
-
+  NINE: 57,
+  ZERO: 48,
   PLUS: 187,
   MINUS: 189,
 
@@ -76,6 +77,7 @@ const drawShapes = (cubes) => {
     });
   });
 };
+
 const moveCallback = (shape, delta = 5) => {
   if (keyIsDown(KEYS.LEFT)) {
     shape.centre.x -= delta;
@@ -88,6 +90,12 @@ const moveCallback = (shape, delta = 5) => {
   }
   if (keyIsDown(KEYS.DOWN)) {
     shape.centre.y += delta;
+  }
+  if (keyIsDown(KEYS.NINE)) {
+    shape.centre.z -= delta;
+  }
+  if (keyIsDown(KEYS.ZERO)) {
+    shape.centre.z += delta;
   }
 };
 const callback = (shapes, mode = "eye") => {
