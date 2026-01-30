@@ -55,6 +55,14 @@ class Cube {
 
     return [f1, f2, f3, f4, f5, f6];
   }
+
+  getWorldFacesPoint() {
+    return this.faces.map((vertices, i) => {
+      return vertices.map((point) => {
+        return p5.Vector.add(point, this.centre);
+      });
+    });
+  }
 }
 
 const getProjection = (p, screenZ = WORLD_ITEMS.screenZ) => {
@@ -64,33 +72,41 @@ const getProjection = (p, screenZ = WORLD_ITEMS.screenZ) => {
   return createVector(projectedX, projectedY);
 };
 
-let cube;
+const cubes = [];
 function setup() {
   createCanvas(400, 600);
 
-  cube = new Cube(-100, 100, 700, 100, 100, 100);
+  const cube1 = new Cube(0, 0, 1000, 100, 100, 100);
+  const cube2 = new Cube(150, 150, 1000, 100, 100, 100);
+  const cube3 = new Cube(-150, 150, 1000, 100, 100, 100);
+  const cube4 = new Cube(-150, -150, 1000, 100, 100, 100);
+  const cube5 = new Cube(150, -150, 1000, 100, 100, 100);
+
+  cubes.push(cube1, cube2, cube3, cube4, cube5);
 }
+
+const drawShapes = (cubes) => {
+  cubes.forEach((cube, i) => {
+    const faces = cube.getWorldFacesPoint();
+
+    faces.forEach((vertices, j) => {
+      fill(WORLD_ITEMS.palette[j]);
+
+      beginShape();
+      vertices.forEach((p) => {
+        const projected = getProjection(p);
+        vertex(projected.x, projected.y);
+      });
+      const projected = getProjection(vertices[0]);
+      vertex(projected.x, projected.y);
+      endShape();
+    });
+  });
+};
 
 function draw() {
   background(220, 220, 220);
   translate(width / 2, height / 2);
-  beginShape();
-
-  cube.faces.forEach((face) => {
-    stroke(0);
-    beginShape();
-    face.forEach((p) => {
-      const actualPoint = p5.Vector.add(p, cube.centre);
-      const toProject = getProjection(actualPoint);
-      vertex(toProject.x, toProject.y);
-    });
-
-    const actualPoint = p5.Vector.add(face[0], cube.centre);
-    const toProject = getProjection(actualPoint);
-    vertex(toProject.x, toProject.y);
-
-    endShape();
-  });
-
+  drawShapes(cubes);
   noLoop();
 }
