@@ -1,9 +1,6 @@
 /// <reference types="p5/global"/>
 // @ts-nocheck:
 // deno-lint-ignore-file no-unused-vars
-
-const scaleFactor = 30;
-
 const WORLD_ITEMS = {
   screenZ: 700,
   palette: [
@@ -19,51 +16,26 @@ const WORLD_ITEMS = {
     "#A3BFFA", // Periwinkle
   ],
 };
+const KEYS = {
+  LEFT: 37,
+  UP: 38,
+  RIGHT: 39,
+  DOWN: 40,
 
-class Cube {
-  constructor(x, y, z, h, w, d) {
-    this.centre = createVector(x, y, z);
-    this.h = h;
-    this.w = w;
-    this.d = d;
-    this.vertices = this.createVertices();
-    this.faces = this.createFaces();
-  }
+  PLUS: 187,
+  MINUS: 189,
 
-  createVertices() {
-    // {FRONT/BACK}<->{LEFT/RIGHT}<->{TOP/BOTTOM}
-    const [w2, h2, d2] = [this.w / 2, this.h / 2, this.d / 2];
-    const p1 = createVector(-w2, -h2, -d2); //(F-L-T)
-    const p2 = createVector(-w2, +h2, -d2); //(F-L-B)
-    const p3 = createVector(+w2, +h2, -d2); //(F-R-B)
-    const p4 = createVector(+w2, -h2, -d2); //(F-R-T)
-    const p5 = createVector(+w2, -h2, +d2); //(B-R-T)
-    const p6 = createVector(+w2, +h2, +d2); //(B-R-B)
-    const p7 = createVector(-w2, +h2, +d2); //(B-L-B)
-    const p8 = createVector(-w2, -h2, +d2); //(B-L-T)
-    return [p1, p2, p3, p4, p5, p6, p7, p8];
-  }
-
-  createFaces() {
-    const [p1, p2, p3, p4, p5, p6, p7, p8] = this.vertices;
-    const f1 = [p1, p2, p3, p4]; // FRONT
-    const f2 = [p5, p6, p7, p8]; // BACK
-    const f3 = [p1, p4, p5, p8]; // TOP
-    const f4 = [p2, p3, p6, p7]; // BOTTOM
-    const f5 = [p1, p8, p7, p2]; // LEFT
-    const f6 = [p4, p3, p6, p5]; // RIGHT
-
-    return [f1, f2, f3, f4, f5, f6];
-  }
-
-  getWorldFacesPoint() {
-    return this.faces.map((vertices, i) => {
-      return vertices.map((point) => {
-        return p5.Vector.add(point, this.centre);
-      });
-    });
-  }
-}
+  W: 87,
+  A: 65,
+  S: 83,
+  D: 68,
+  I: 73,
+  J: 74,
+  K: 75,
+  L: 76,
+  Q: 81,
+  E: 69,
+};
 
 const getProjection = (p, screenZ = WORLD_ITEMS.screenZ) => {
   const projectedX = screenZ * p.x / p.z;
@@ -73,6 +45,7 @@ const getProjection = (p, screenZ = WORLD_ITEMS.screenZ) => {
 };
 
 const cubes = [];
+
 function setup() {
   createCanvas(400, 600);
 
@@ -103,10 +76,29 @@ const drawShapes = (cubes) => {
     });
   });
 };
-
+const moveCallback = (shape, delta = 5) => {
+  if (keyIsDown(KEYS.LEFT)) {
+    shape.centre.x -= delta;
+  }
+  if (keyIsDown(KEYS.RIGHT)) {
+    shape.centre.x += delta;
+  }
+  if (keyIsDown(KEYS.UP)) {
+    shape.centre.y -= delta;
+  }
+  if (keyIsDown(KEYS.DOWN)) {
+    shape.centre.y += delta;
+  }
+};
+const callback = (shapes, mode = "eye") => {
+  if (mode === "eye") {
+    shapes.map((shape) => moveCallback(shape));
+  }
+};
 function draw() {
   background(220, 220, 220);
   translate(width / 2, height / 2);
+  callback(cubes);
   drawShapes(cubes);
-  noLoop();
+  // noLoop();
 }
