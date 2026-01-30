@@ -1,22 +1,25 @@
 /// <reference types="p5/global"/>
 // @ts-nocheck:
+// deno-lint-ignore-file no-unused-vars
+
 const scaleFactor = 30;
 
 const WORLD_ITEMS = {
   screenZ: 700,
-  x: [
-    [-1, -1, -1],
-    [1, -1, -1],
-    [1, 1, -1],
-    [-1, 1, -1],
-    [-1, -1, 1],
-    [1, -1, 1],
-    [1, 1, 1],
-    [-1, 1, 1],
-  ].map((group) => group.map((p) => p * scaleFactor)),
+  palette: [
+    "#FFFFFF", // Pure White
+    "#E6F0FA", // Soft Ice Blue
+    "#B3D4F5", // Light Sky Blue
+    "#4A90E2", // Medium Blue
+    "#1F4FD8", // Royal Blue
+    "#0B2C5D", // Deep Navy
+    "#00A8E8", // Bright Cyan
+    "#6C8EBF", // Muted Steel Blue
+    "#F2F4F8", // Cool Off-White
+    "#A3BFFA", // Periwinkle
+  ],
 };
 
-let pC, pC2;
 class Cube {
   constructor(x, y, z, h, w, d) {
     this.centre = createVector(x, y, z);
@@ -40,38 +43,33 @@ class Cube {
     return [p1, p2, p3, p4, p5, p6, p7, p8];
   }
 }
+
 const getProjection = (p, screenZ = WORLD_ITEMS.screenZ) => {
   const projectedX = screenZ * p.x / p.z;
   const projectedY = screenZ * p.y / p.z;
 
   return createVector(projectedX, projectedY);
 };
+
 let cube;
 function setup() {
   createCanvas(400, 600);
 
-  // cube = new Cube(0, 0, 1000, 200, 200, 200);
-  pC = createVector(100, 200, 900);
-  pC2 = createVector(100, 200, 700);
+  cube = new Cube(0, 0, 1000, 100, 100, 100);
 }
-
-const size = 40;
 
 function draw() {
   background(220, 220, 220);
   translate(width / 2, height / 2);
 
-  const projectedPoint = getProjection(pC);
-  fill(255, 0, 0);
-  circle(projectedPoint.x, projectedPoint.y, size);
+  cube.vertices.forEach((p, i) => {
+    const actualPos = p5.Vector.add(p, cube.centre);
 
-  const projectedPoint2 = getProjection(pC2);
-  fill(0, 255, 0, 100);
-  circle(projectedPoint2.x, projectedPoint2.y, size);
-  fill(255, 0, 0, 100);
-  circle(pC.x, pC.y, 20);
+    const toProject = getProjection(actualPos);
 
+    fill(WORLD_ITEMS.palette[i]);
+    circle(toProject.x, toProject.y, 5);
+  });
 
-
-
+  noLoop();
 }
