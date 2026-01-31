@@ -1,6 +1,15 @@
 /// <reference types="p5/global"/>
 // @ts-nocheck:
-// deno-lint-ignore-file no-unused-vars
+const SHAPES = [];
+const DETAILS = {
+  topAlign: 20,
+  rightAlign: 120,
+  textSize: 15
+};
+const MODES = {
+  eye: 'eye',
+  object: 'object'
+};
 const WORLD_ITEMS = {
   screenZ: 700,
   palette: [
@@ -34,30 +43,28 @@ const KEYS = {
   J: 74,
   K: 75,
   L: 76,
+  M: 77,
   Q: 81,
   E: 69,
 };
 
-const getProjection = (p, screenZ = WORLD_ITEMS.screenZ) => {
-  const projectedX = screenZ * p.x / p.z;
-  const projectedY = screenZ * p.y / p.z;
-
-  return createVector(projectedX, projectedY);
-};
-
-const cubes = [];
-
 function setup() {
-  createCanvas(400, 600);
+  createCanvas(600, 600);
 
-  const cube1 = new Cube(0, 0, 1000, 100, 100, 100);
-  const cube2 = new Cube(150, 150, 1000, 100, 100, 100);
-  const cube3 = new Cube(-150, 150, 1000, 100, 100, 100);
-  const cube4 = new Cube(-150, -150, 1000, 100, 100, 100);
-  const cube5 = new Cube(150, -150, 1000, 100, 100, 100);
+  ((x) => {
+    if (x) return;
+    const cube1 = new Cube(0, 0, 1000, 100, 100, 100);
+    const cube2 = new Cube(150, 150, 1000, 100, 100, 100);
+    const cube3 = new Cube(-150, 150, 1000, 100, 100, 100);
+    const cube4 = new Cube(-150, -150, 1000, 100, 100, 100);
+    const cube5 = new Cube(150, -150, 1000, 100, 100, 100);
 
-  cubes.push(cube1, cube2, cube3, cube4, cube5);
+    SHAPES.push(cube1, cube2, cube3, cube4, cube5);
+  })(false);
+
 }
+
+let selectedIdx = 0;
 
 const drawShapes = (cubes) => {
   cubes.forEach((cube, i) => {
@@ -78,35 +85,50 @@ const drawShapes = (cubes) => {
   });
 };
 
-const moveCallback = (shape, delta = 5) => {
-  if (keyIsDown(KEYS.LEFT)) {
-    shape.centre.x -= delta;
-  }
-  if (keyIsDown(KEYS.RIGHT)) {
-    shape.centre.x += delta;
-  }
-  if (keyIsDown(KEYS.UP)) {
-    shape.centre.y -= delta;
-  }
-  if (keyIsDown(KEYS.DOWN)) {
-    shape.centre.y += delta;
-  }
-  if (keyIsDown(KEYS.NINE)) {
-    shape.centre.z -= delta;
-  }
-  if (keyIsDown(KEYS.ZERO)) {
-    shape.centre.z += delta;
-  }
-};
 const callback = (shapes, mode = "eye") => {
   if (mode === "eye") {
     shapes.map((shape) => moveCallback(shape));
+  } else {
+    const selectedShape = shapes[selectedIdx];
+    moveCallback(selectedShape);
   }
 };
+
+function keyPressed() {
+  if (key === "M" || key === "m") {
+    mode = mode === MODES.eye ? MODES.object : MODES.eye;
+  }
+  if (key === '[' || key === '{') {
+    selectedIdx = (selectedIdx === 0) ? (SHAPES.length - 1) : (selectedIdx - 1);
+  }
+  if (key === ']' || key === '}') {
+    selectedIdx = (selectedIdx + 1) % SHAPES.length;
+  }
+
+
+
+}
+
+
+let mode = MODES.eye;
+
+const showDetails = () => {
+  push()
+  translate(-width / 2, -height / 2);
+
+  textSize(DETAILS.textSize);
+  const formatted = `mode: ${mode}\ncurrent: ${selectedIdx}`;
+  text(formatted, width - DETAILS.rightAlign, DETAILS.topAlign);
+  pop()
+
+}
+
 function draw() {
   background(220, 220, 220);
   translate(width / 2, height / 2);
-  callback(cubes);
-  drawShapes(cubes);
+  callback(SHAPES, mode);
+  // stateCallback()
+  drawShapes(SHAPES);
+  showDetails()
   // noLoop();
 }
