@@ -1,0 +1,2 @@
+WE will use radian system in future 
+Removal of variable in future that were declared for readability

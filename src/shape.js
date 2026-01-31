@@ -1,17 +1,22 @@
+// @ts-nocheck:
 class Cube {
   constructor(x, y, z, h, w, d) {
     this.centre = createVector(x, y, z);
     this.h = h;
     this.w = w;
     this.d = d;
+    this.OGpoint = this.createVertices();
     this.vertices = this.createVertices();
     this.faces = this.createFaces();
+
+    this.rotations = createVector(0, 0, 0);
   }
 
   createVertices() {
     // {FRONT/BACK}<->{LEFT/RIGHT}<->{TOP/BOTTOM}
     const [w2, h2, d2] = [this.w / 2, this.h / 2, this.d / 2];
     const p1 = createVector(-w2, -h2, -d2); //(F-L-T)
+    this.p1 = p1
     const p2 = createVector(-w2, +h2, -d2); //(F-L-B)
     const p3 = createVector(+w2, +h2, -d2); //(F-R-B)
     const p4 = createVector(+w2, -h2, -d2); //(F-R-T)
@@ -24,6 +29,7 @@ class Cube {
 
   createFaces() {
     const [p1, p2, p3, p4, p5, p6, p7, p8] = this.vertices;
+
     const f1 = [p1, p2, p3, p4]; // FRONT
     const f2 = [p5, p6, p7, p8]; // BACK
     const f3 = [p1, p4, p5, p8]; // TOP
@@ -34,11 +40,54 @@ class Cube {
     return [f1, f2, f3, f4, f5, f6];
   }
 
+  changeRotation(x = 0, y = 0, z = 0) {
+    this.rotations.add(createVector(x, y, z));
+  }
+
+
+  rotateInAxis(point, angle, fromAxis = "x", toAxis = "y") {
+    let c = cos(angle);
+    let s = sin(angle);
+
+    let fromAxisPoint = point[fromAxis] * c - point[toAxis] * s;
+    let toAxisPoint = point[fromAxis] * s + point[toAxis] * c;
+
+    return [fromAxisPoint, toAxisPoint]
+  }
+
+  rotateVertices() {
+    this.OGpoint.forEach((point, i) => {
+      let newX, newY, newZ;
+      let dx = 0, dy = 0, dz = 0;
+
+      [newY, newZ] = this.rotateInAxis(point, this.rotations.x, "y", "z")
+      dy += newY - point.y;
+      dz += newZ - point.z;
+
+      [newZ, newX] = this.rotateInAxis(point, this.rotations.y, "z", "x")
+      dx += newX - point.x;
+      dz += newZ - point.z;
+
+      [newX, newY] = this.rotateInAxis(point, this.rotations.z, "x", "y")
+      dx += newX - point.x;
+      dy += newY - point.y;
+
+      this.vertices[i].x = point.x + dx;
+      this.vertices[i].y = point.y + dy;
+      this.vertices[i].z = point.z + dz;
+    })
+  }
+
   getWorldFacesPoint() {
+
+
+    this.rotateVertices()
     return this.faces.map((vertices, i) => {
       return vertices.map((point) => {
         return p5.Vector.add(point, this.centre);
       });
     });
   }
+
+
 }

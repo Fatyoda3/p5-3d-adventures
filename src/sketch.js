@@ -1,6 +1,8 @@
 /// <reference types="p5/global"/>
 // @ts-nocheck:
+
 const SHAPES = [];
+
 const DETAILS = {
   topAlign: 20,
   rightAlign: 120,
@@ -48,8 +50,17 @@ const KEYS = {
   E: 69,
 };
 
+let selectedIdx = 0;
+let mode = MODES.eye;
+
+
 function setup() {
-  createCanvas(600, 600);
+  createCanvas(windowWidth, windowHeight);
+  const cube1 = new Cube(0, 0, 1000, 100, 100, 100);
+
+
+
+  SHAPES.push(cube1);
 
   ((x) => {
     if (x) return;
@@ -60,75 +71,16 @@ function setup() {
     const cube5 = new Cube(150, -150, 1000, 100, 100, 100);
 
     SHAPES.push(cube1, cube2, cube3, cube4, cube5);
-  })(false);
-
-}
-
-let selectedIdx = 0;
-
-const drawShapes = (cubes) => {
-  cubes.forEach((cube, i) => {
-    const faces = cube.getWorldFacesPoint();
-
-    faces.forEach((vertices, j) => {
-      fill(WORLD_ITEMS.palette[j]);
-
-      beginShape();
-      vertices.forEach((p) => {
-        const projected = getProjection(p);
-        vertex(projected.x, projected.y);
-      });
-      const projected = getProjection(vertices[0]);
-      vertex(projected.x, projected.y);
-      endShape();
-    });
-  });
-};
-
-const callback = (shapes, mode = "eye") => {
-  if (mode === "eye") {
-    shapes.map((shape) => moveCallback(shape));
-  } else {
-    const selectedShape = shapes[selectedIdx];
-    moveCallback(selectedShape);
-  }
-};
-
-function keyPressed() {
-  if (key === "M" || key === "m") {
-    mode = mode === MODES.eye ? MODES.object : MODES.eye;
-  }
-  if (key === '[' || key === '{') {
-    selectedIdx = (selectedIdx === 0) ? (SHAPES.length - 1) : (selectedIdx - 1);
-  }
-  if (key === ']' || key === '}') {
-    selectedIdx = (selectedIdx + 1) % SHAPES.length;
-  }
-
-
-
-}
-
-
-let mode = MODES.eye;
-
-const showDetails = () => {
-  push()
-  translate(-width / 2, -height / 2);
-
-  textSize(DETAILS.textSize);
-  const formatted = `mode: ${mode}\ncurrent: ${selectedIdx}`;
-  text(formatted, width - DETAILS.rightAlign, DETAILS.topAlign);
-  pop()
-
+  })(true);
 }
 
 function draw() {
+
   background(220, 220, 220);
   translate(width / 2, height / 2);
   callback(SHAPES, mode);
-  // stateCallback()
   drawShapes(SHAPES);
   showDetails()
-  // noLoop();
+  // noLoop()
+  // frameRate(1)
 }
